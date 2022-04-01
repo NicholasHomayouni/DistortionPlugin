@@ -13,7 +13,8 @@
 //==============================================================================
 /**
 */
-class DistortionAudioProcessor  : public juce::AudioProcessor
+class DistortionAudioProcessor  : public juce::AudioProcessor,
+                                  public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -58,11 +59,21 @@ public:
 
 private:
     //==============================================================================
+    
+    float inputDB = 1.0;
+    float driveDB = 0.0;
+    float mix = 0.0;
+    float outputDB = 0.0;
+    
+    const float piDivisor = 2.0 / juce::MathConstants<float>::pi;
+    
     /* Declare function
     When we finish calling this function, its going to return this ParameterLayout
     which is what we will use as an argument when we're initializing the AudioProcessorValueTreeState
      */
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+    
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DistortionAudioProcessor)
 };

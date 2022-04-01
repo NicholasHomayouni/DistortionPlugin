@@ -22,10 +22,18 @@ DistortionAudioProcessor::DistortionAudioProcessor()
                        ), apvts(*this, nullptr, "Parameters", createParameters()) // returns a ParameterLayout object to use
 #endif
 {
+    apvts.addParameterListener("GAIN", this);
+    apvts.addParameterListener("DRIVE", this);
+    apvts.addParameterListener("MIX", this);
+    apvts.addParameterListener("OUTPUT", this);
 }
 
 DistortionAudioProcessor::~DistortionAudioProcessor()
 {
+    apvts.removeParameterListener("GAIN", this);
+    apvts.removeParameterListener("DRIVE", this);
+    apvts.removeParameterListener("MIX", this);
+    apvts.removeParameterListener("OUTPUT", this);
 }
 
 //==============================================================================
@@ -36,14 +44,45 @@ juce::AudioProcessorValueTreeState::ParameterLayout DistortionAudioProcessor::cr
     // Smart Pointers of the parameters
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
     
+    auto inputParam = std::make_unique<juce::AudioParameterFloat>("GAIN", "Gain", -24.0f, 24.0f, 0.0f);
+    auto driveParam = std::make_unique<juce::AudioParameterFloat>("DRIVE", "driveDB", 0.0f, 20.0f, 0.0f);
+    auto mixParam = std::make_unique<juce::AudioParameterFloat>("MIX", "mix", 0.0f, 100, 0.0f);
+    auto outputParam = std::make_unique<juce::AudioParameterFloat>("OUTPUT", "outputDB", -24.0f, 24.0f, 0.0f);
+    
     /* Use the push_back method since it's a vector
     We have to allocate memory for this unique_pointer.
     AudioParameterFloat IS a type of RangedAudioParameter.
     Give it all its initialization arugments (see docs) */
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("GAIN", "Gain", 0.0f, 1.0f, 0.0f));
+    params.push_back(std::move(inputParam));
+    params.push_back(std::move(driveParam));
+    params.push_back(std::move(mixParam));
+    params.push_back(std::move(outputParam));
     
     // Return iterator of the vector using .begin() and .end() member functions
     return { params.begin(), params.end() };
+}
+
+void DistortionAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+{
+    if (parameterID == "GAIN")
+    {
+        inputDB = newValue;
+    }
+    
+    if (parameterID == "DRIVE")
+    {
+        driveDB = newValue;
+    }
+
+    if (parameterID == "MIX")
+    {
+        mix = static_cast<float>(newValue) / 100.0;
+    }
+
+    if (parameterID == "OUTPUT")
+    {
+        outputDB = newValue;
+    }
 }
 
 const juce::String DistortionAudioProcessor::getName() const
