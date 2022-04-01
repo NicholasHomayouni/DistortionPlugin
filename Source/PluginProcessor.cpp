@@ -19,7 +19,7 @@ DistortionAudioProcessor::DistortionAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts(*this, nullptr, "Parameters", createParameters()) // returns a ParameterLayout object to use
 #endif
 {
 }
@@ -29,6 +29,23 @@ DistortionAudioProcessor::~DistortionAudioProcessor()
 }
 
 //==============================================================================
+/* Implement the function to give us our parameter layout*/
+juce::AudioProcessorValueTreeState::ParameterLayout DistortionAudioProcessor::createParameters()
+{
+    // A vector of all the ranged audio parameters
+    // Smart Pointers of the parameters
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+    
+    /* Use the push_back method since it's a vector
+    We have to allocate memory for this unique_pointer.
+    AudioParameterFloat IS a type of RangedAudioParameter.
+    Give it all its initialization arugments (see docs) */
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("GAIN", "Gain", 0.0f, 1.0f, 0.0f));
+    
+    // Return iterator of the vector using .begin() and .end() member functions
+    return { params.begin(), params.end() };
+}
+
 const juce::String DistortionAudioProcessor::getName() const
 {
     return JucePlugin_Name;

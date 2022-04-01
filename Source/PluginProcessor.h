@@ -52,8 +52,17 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    // Create our APVTS object
+    juce::AudioProcessorValueTreeState apvts;
 
 private:
     //==============================================================================
+    /* Declare function
+    When we finish calling this function, its going to return this ParameterLayout
+    which is what we will use as an argument when we're initializing the AudioProcessorValueTreeState
+     */
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DistortionAudioProcessor)
 };
